@@ -10,6 +10,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
+// creating mock data
 var sampleCustomers = model.CreateSampleCustomers()
 
 // GetALlCustomers
