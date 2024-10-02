@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sample CRM build with go</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        header {
+            background-color: #4CAF50;
+            color: white;
+            padding: 15px;
+            text-align: center;
+        }
+        main {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Welcome to My CRM Page</h1>
+</header>
+
+<main>
+    <h2>The Customer data set has :</h2>
+    <ul>
+        <li>ID (Int) -> which is used to identify the customer. This can be used to retrive, delete customers.</li>
+        <li>(String) -> name property of customer</li>
+        <li>Role (String) -> role of the customer</li>
+        <li>Email (String) -> email of customer</li>
+        <li>Phone (String) -> phone of customer</li>
+        <li>Contacted (Bool True/False) -> This indicates if the customer has been contacted</li>
+    </ul>
+    <p>The project can be started via go run main.go</p>
+    <p>The project initialises with a set of Customer data on startup
+        It is launched in port 3000 on localhost</p>
+</main>
+
+</body>
+</html>

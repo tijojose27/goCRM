@@ -3,13 +3,15 @@ Sample CRM build with go
 
 
 The Customer data set has :
-ID (Int) -> which is used to identify the customer. This can be used to retrive, delete customers.
+ID (String) -> Unique identifier for customer using UUID
 Name (String) -> name property of customer
 Role (String) -> role of the customer
 Email (String) -> email of customer
 Phone (String) -> phone of customer
 Contacted (Bool True/False) -> This indicates if the customer has been contacted
 
+
+WHEN ADDING NEW customer do not pass in ID  just pass in Name (String), Role (String), Email (String), Phone (String) and Contacted (Bool) 
 
 The project can be started via go run main.go
 

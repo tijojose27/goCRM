@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"goCRM/model"
 	"net/http"
-	"strconv"
 
 	"github.com/gorilla/mux"
 )
@@ -24,30 +23,22 @@ func getCustomers(w http.ResponseWriter, r *http.Request) {
 func getCustomer(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	vars := mux.Vars(r)["id"]
-
-	id, err := strconv.Atoi(vars)
+	id := mux.Vars(r)["id"]
 
 	customersWithID := []model.Customer{}
-	if err == nil {
-		for _, customer := range sampleCustomers {
-			if customer.ID == id {
-				customersWithID = append(customersWithID, customer)
-			}
+	for _, customer := range sampleCustomers {
+		if customer.ID == id {
+			customersWithID = append(customersWithID, customer)
 		}
-		fmt.Printf("Length of all customers is : %v", len(customersWithID))
-		if len(customersWithID) == 0 {
-			fmt.Println(err)
-			w.WriteHeader(http.StatusNotFound)
-			return
-		} else {
-			w.WriteHeader(http.StatusOK)
-			json.NewEncoder(w).Encode(customersWithID)
-			return
-		}
-	} else {
-		fmt.Println(err)
+	}
+	fmt.Printf("Length of all customers is : %v", len(customersWithID))
+	if len(customersWithID) == 0 {
 		w.WriteHeader(http.StatusNotFound)
+		return
+	} else {
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(customersWithID)
+		return
 	}
 }
 
@@ -55,17 +46,25 @@ func getCustomer(w http.ResponseWriter, r *http.Request) {
 func addCustomer(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	var customerToAdd model.Customer
+	var postCustomerData struct {
+		Name      string `json:"name"`
+		Role      string `json:"role"`
+		Email     string `json:"email"`
+		Phone     string `json:"phone"`
+		Contacted bool   `json:"contacted"`
+	}
 
-	err := json.NewDecoder(r.Body).Decode(&customerToAdd)
+	err := json.NewDecoder(r.Body).Decode(&postCustomerData)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	sampleCustomers = append(sampleCustomers, customerToAdd)
+	newCustomer := model.NewCustomer(postCustomerData.Name, postCustomerData.Role, postCustomerData.Email, postCustomerData.Phone, postCustomerData.Contacted)
 
-	err = json.NewEncoder(w).Encode(&customerToAdd)
+	sampleCustomers = append(sampleCustomers, newCustomer)
+
+	err = json.NewEncoder(w).Encode(&newCustomer)
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
 		return
@@ -79,33 +78,25 @@ func addCustomer(w http.ResponseWriter, r *http.Request) {
 func deleteCustomer(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	vars := mux.Vars(r)["id"]
-
-	id, err := strconv.Atoi(vars)
+	id := mux.Vars(r)["id"]
 
 	customersWithID := model.Customer{}
-	if err == nil {
 
-		for index, customer := range sampleCustomers {
-			if customer.ID == id {
-				customersWithID = sampleCustomers[index]
-				sampleCustomers = append(sampleCustomers[:index], sampleCustomers[index+1:]...)
-				break
-			}
+	for index, customer := range sampleCustomers {
+		if customer.ID == id {
+			customersWithID = sampleCustomers[index]
+			sampleCustomers = append(sampleCustomers[:index], sampleCustomers[index+1:]...)
+			break
 		}
+	}
 
-		if len(customersWithID.Name) == 0 {
-			fmt.Println(err)
-			w.WriteHeader(http.StatusNotFound)
-			return
-		} else {
-			w.WriteHeader(http.StatusOK)
-			json.NewEncoder(w).Encode(customersWithID)
-			return
-		}
-	} else {
-		fmt.Println(err)
+	if len(customersWithID.Name) == 0 {
 		w.WriteHeader(http.StatusNotFound)
+		return
+	} else {
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(customersWithID)
+		return
 	}
 }
 
@@ -113,7 +104,7 @@ func deleteCustomer(w http.ResponseWriter, r *http.Request) {
 func updateCustomer(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	vars := mux.Vars(r)["id"]
+	id := mux.Vars(r)["id"]
 
 	var customerToUpdate model.Customer
 
@@ -123,26 +114,26 @@ func updateCustomer(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	id, idErr := strconv.Atoi(vars)
-	if idErr == nil {
-		for index, customer := range sampleCustomers {
-			if customer.ID == id {
-				sampleCustomers[index] = customerToUpdate
-				w.WriteHeader(http.StatusOK)
-				json.NewEncoder(w).Encode(customerToUpdate)
-				return
-			}
+	for index, customer := range sampleCustomers {
+		if customer.ID == id {
+			sampleCustomers[index] = customerToUpdate
+			w.WriteHeader(http.StatusOK)
+			json.NewEncoder(w).Encode(customerToUpdate)
+			return
 		}
-	} else {
-		fmt.Println(err)
-		w.WriteHeader(http.StatusNotFound)
 	}
+	w.WriteHeader(http.StatusNotFound)
+}
+
+func showLandingPage(w http.ResponseWriter, r *http.Request) {
+	http.ServeFile(w, r, "static/index.html")
 }
 
 func main() {
 
 	router := mux.NewRouter().StrictSlash(true)
 
+	router.HandleFunc("/", showLandingPage)
 	router.HandleFunc("/customers", getCustomers).Methods("GET")
 	router.HandleFunc("/customers/{id}", getCustomer).Methods("GET")
 	router.HandleFunc("/customers", addCustomer).Methods("POST")
